@@ -43,11 +43,4 @@ Il faut PHP 8 avec `pdo_mysql`, MariaDB et Apache avec `mod_rewrite` (le `.htacc
 
 Comptes de test : `joueur1` / `passjohn`, `joueur2` / `passjane`, `playerA` / `password`.
 
-## L'équipe
-
 Projet de [JET-V](https://github.com/JET-V), plus de 400 commits à quatre :
-
-- **Jonathan** ([@Jonathan-333](https://github.com/Jonathan-333)) : l'en-tête et la navigation (stats du joueur, liens selon la connexion), la page de détails d'un objet (achat, revente, utilisation), le formulaire de profil avec l'envoi de la photo, l'affichage et le vidage du panier, la recherche dans la boutique, les formulaires d'inscription et de connexion, et les modèles `UserModel`, `ItemModel` et ceux des énigmes.
-- **Emilien** ([@emil1326](https://github.com/emil1326))
-- **Thomas** ([@ThomasAneakot](https://github.com/ThomasAneakot))
-- **Victor** ([@OnlineAquaCow](https://github.com/OnlineAquaCow))
