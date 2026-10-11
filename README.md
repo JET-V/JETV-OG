@@ -2,7 +2,7 @@
 
 Une boutique de jeu de rôle en PHP, faite en équipe de quatre au cégep (mars à mai 2025). On s'inscrit, on gagne des caps en répondant à des énigmes, on achète de l'équipement, on le range dans son sac et on l'utilise. Chaque objet a un poids : un sac trop lourd fait baisser la dextérité.
 
-<!-- Captures d'écran : ajouter ici la boutique, la page d'un objet et une énigme (ex. docs/shop.png) -->
+![La boutique, connecté avec un joueur : ses stats en haut, les filtres à gauche et les objets à droite](docs/boutique.png)
 
 ## Ce qu'on peut faire
 
