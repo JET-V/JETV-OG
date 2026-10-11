@@ -31,7 +31,7 @@ create table joueure
     joueureID int auto_increment primary key,
     
     alias varchar(50),
-    playerPassword varbinary(256) not null, -- todo
+    playerPassword varchar(255) not null, -- password_hash() (bcrypt), hashed in PHP
     isAdmin tinyint unsigned default 0 not null, -- 0 non, 1 oui
     nom varchar(50) not null,
     prenom varchar(50) not null,
@@ -248,7 +248,7 @@ create table lastTimeTable
     foreign key (playerID) references joueure(joueureID),
     
 	lastTime int
-)
+);
 
 -- [  VIEWS  ] --
 
@@ -616,7 +616,7 @@ create function CreateJoueur(
     p_alias varchar(50),
     p_nom varchar(50),
     p_prenom varchar(50),
-    p_playerPassword varchar(50),
+    p_playerPassword varchar(255), -- already hashed by PHP (password_hash)
     p_playerImageLink varchar(300)
 ) returns int
 begin
@@ -629,7 +629,7 @@ begin
 
     if p_playerID is null then
         insert into joueure (alias, nom, prenom, playerPassword, playerImageLink)
-            values (p_alias, p_nom, p_prenom, SHA2(p_playerPassword, 256), p_playerImageLink); 
+            values (p_alias, p_nom, p_prenom, p_playerPassword, p_playerImageLink); 
 
         select joueureID into p_playerID
         from joueure
@@ -784,31 +784,14 @@ delimiter ;
 
 -- s_login/passwords
 
-drop function if exists CheckLogin;
-delimiter //
-create function CheckLogin(p_alias varchar(50), p_playerPassword varchar(50)) returns int
-begin    
-    declare idJoueur int;
-    
-    select joueureID into idJoueur
-    from joueure
-    where alias = p_alias and playerPassword = SHA2(p_playerPassword, 256);
-    
-    if idJoueur is not null then
-        return idJoueur;
-    else
-        return -1;
-    end if;
-end;
-//
-delimiter ;
+drop function if exists CheckLogin; -- the login is checked in PHP with password_verify (UserModel::authentify)
 
 drop procedure if exists ChangePassword;
 delimiter //
-create procedure ChangePassword(in p_playerID varchar(50), in p_playerPassword varchar(50))
+create procedure ChangePassword(in p_playerID varchar(50), in p_playerPassword varchar(255)) -- already hashed by PHP
 begin
     update joueure
-    set playerPassword = SHA2(p_playerPassword, 256)
+    set playerPassword = p_playerPassword
     where joueureID = p_playerID;
 end;
 //
@@ -873,7 +856,7 @@ create procedure GetAllCommentaires(
     in p_itemID int
 )
 begin
-    select joueureID, commentaireID, commentaire
+    select joueureID, commentaireID, commentaire, evaluations
     from commentaires
     where itemID = p_itemID;
 end;
@@ -1103,14 +1086,12 @@ drop procedure if exists GetOneRandomQuestionByDifficulty;
 delimiter //
 create procedure GetOneRandomQuestionByDifficulty(in p_difficultyID int)
 begin
-    SET @row_count = (SELECT COUNT(*) FROM listeQuetes WHERE diffID = p_difficultyID);
-    SET @random_offset = FLOOR(RAND() * @row_count);
-
-    set @rnQuestID = (        
+    set @rnQuestID = (
         select questID from listeQuetes
+        where diffID = p_difficultyID
         order by rand()
-        limit 1 OFFSET @random_offset; 
-    )
+        limit 1
+    );
 
     select listeQuetes.questID, listeQuetes.question, diffQuetes.difficultyName, diffQuetes.pvLoss from listeQuetes
     join diffQuetes on diffQuetes.diffID = listeQuetes.diffID and listeQuetes.diffID= p_difficultyID and listeQuetes.questID = @rnQuestID
@@ -1210,6 +1191,54 @@ begin
     select listeQuetes.questID, listeQuetes.question, reponsesQuetes.reponse, diffQuetes.difficultyName,reponsesQuetes.awnserID, diffQuetes.pvLoss, reponsesQuetes.flagEstVrai from listeQuetes
     join diffQuetes on diffQuetes.diffID = listeQuetes.diffID
     join reponsesQuetes on reponsesQuetes.questID = listeQuetes.questID;
+end;
+//
+delimiter ;
+
+-- get the answers of one question
+drop procedure if exists GetOneQuestionAndAwnserByID;
+delimiter //
+create procedure GetOneQuestionAndAwnserByID(in p_questID int)
+begin
+    select listeQuetes.questID, listeQuetes.question, reponsesQuetes.reponse, diffQuetes.difficultyName, reponsesQuetes.awnserID, diffQuetes.pvLoss, reponsesQuetes.flagEstVrai from listeQuetes
+    join diffQuetes on diffQuetes.diffID = listeQuetes.diffID
+    join reponsesQuetes on reponsesQuetes.questID = listeQuetes.questID
+    where listeQuetes.questID = p_questID;
+end;
+//
+delimiter ;
+
+-- get the question the player is on (playerQuests, emptied by DoQuest), or pick a new random one of this difficulty
+drop procedure if exists GetOneRandomQuestionByDifficultyOrLastDone;
+delimiter //
+create procedure GetOneRandomQuestionByDifficultyOrLastDone(in p_difficultyID int, in p_joueureID int)
+begin
+    declare v_questID int default null;
+
+    select playerQuests.questID into v_questID
+    from playerQuests
+    join listeQuetes on listeQuetes.questID = playerQuests.questID
+    where playerQuests.joueureID = p_joueureID and listeQuetes.diffID = p_difficultyID
+    limit 1;
+
+    if v_questID is null then
+        -- the player switched difficulty or has no question yet
+        delete from playerQuests where joueureID = p_joueureID;
+
+        select questID into v_questID
+        from listeQuetes
+        where diffID = p_difficultyID
+        order by rand()
+        limit 1;
+
+        if v_questID is not null then
+            insert into playerQuests (joueureID, questID) values (p_joueureID, v_questID);
+        end if;
+    end if;
+
+    select listeQuetes.questID, listeQuetes.question, diffQuetes.difficultyName, diffQuetes.pvLoss from listeQuetes
+    join diffQuetes on diffQuetes.diffID = listeQuetes.diffID
+    where listeQuetes.questID = v_questID;
 end;
 //
 delimiter ;
@@ -2091,13 +2120,13 @@ call CreateItem('SuperHeavy Pistol LW edition', 'Un pistolet de calibre 500mm', 
 call CreateItem('Mort Instantanée', 'Un item qui cause une mort instantanée', 1, 1000.0, 500.0, 'mort_instantanee.png', 255, 0, 'med', 'Cause la mort', 'Instantané', 'la mort', -10000, 10);
 call CreateItem('Super Gain de Vie', 'Un item qui donne 10 000 points de vie', 1, 5000.0, 2500.0, 'super_gain_vie.png', 255, 0, 'med', 'Donne 10 000 PV', 'Instantané', 'vivre une autre journer', 10000, 10);
 
--- joueurs
-select CreateJoueur('je vins, je vus, je construit', 'bob', 'leBricoleur', 'passbob');
+-- joueurs (mots de passe hachés avec password_hash, le mot de passe en clair est en commentaire)
+select CreateJoueur('je vins, je vus, je construit', 'bob', 'leBricoleur', '$2y$10$9OWpvIiBbH7o/pOjxYsaMuk1ae4laDTzYMGblkN3XpCoWmcELoiAW', 'default.webp'); -- mot de passe : passbob
 
-select CreateJoueur('joueur1', 'John', 'Doe', 'passjohn');
-select CreateJoueur('joueur2', 'Jane', 'Smith', 'passjane');
-select CreateJoueur('joueur3', 'Alice', 'Johnson', 'passalice');
-select CreateJoueur('playerA', 'firstname', 'lastname', 'password');
+select CreateJoueur('joueur1', 'John', 'Doe', '$2y$10$z.CgCpVx7Aygm6S9ASVcluBlIi20YNIyB7MdnQsbJvEjve7rdXO8G', 'default.webp'); -- mot de passe : passjohn
+select CreateJoueur('joueur2', 'Jane', 'Smith', '$2y$10$6xNbFdkm30H3kT76nbEAi.yxoM0eRVPR/6qZG3pOZg1y01teMRAbm', 'default.webp'); -- mot de passe : passjane
+select CreateJoueur('joueur3', 'Alice', 'Johnson', '$2y$10$e0Xr75EfZM/gFMq6MUZg5OfXE2JViAKSKYWdC99/ALtTw/PApL.vK', 'default.webp'); -- mot de passe : passalice
+select CreateJoueur('playerA', 'firstname', 'lastname', '$2y$10$hSg6HC7VaDXFyg4QNeOnSO9lQDsABJHAZkEHufXtgD19pHJKjTGl.', 'default.webp'); -- mot de passe : password
 
 -- evaluations 
 call PostCommentaire(5, 2, 'Superbe !!', 4);

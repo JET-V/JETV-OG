@@ -50,14 +50,18 @@ class UserModel extends Model
     public function authentify(string $username, string $password): int
     {
         try {
-            $stm = $this->pdo->prepare('SELECT CheckLogin(:username, :password)');
+            // The hash is checked in PHP: password_hash/password_verify (bcrypt, salted) instead of SHA2 in SQL
+            $stm = $this->pdo->prepare('SELECT joueureID, playerPassword FROM joueure WHERE alias = :username');
             $stm->bindValue(':username', $username, PDO::PARAM_STR);
-            $stm->bindValue(':password', $password, PDO::PARAM_STR);
             $stm->execute();
 
             $data = $stm->fetch(PDO::FETCH_ASSOC);
 
-            return array_values($data)[0];
+            if (empty($data) || !password_verify($password, $data['playerPassword'])) {
+                return -1;
+            }
+
+            return (int) $data['joueureID'];
         } catch (PDOException $e) {
             throw new PDOException($e->getMessage(), $e->getCode());
         }
@@ -86,7 +90,7 @@ class UserModel extends Model
 
         try {
             $stm = $this->pdo->prepare('SELECT CreateJoueur(?, ?, ?, ?, ?)');
-            $stm->execute([$username, $lastName, $firstName, $password, $profileImage]);
+            $stm->execute([$username, $lastName, $firstName, password_hash($password, PASSWORD_DEFAULT), $profileImage]);
             return null;
         } catch (PDOException $e) {
             return $e;
@@ -139,7 +143,7 @@ class UserModel extends Model
     {
         try {
             $stm = $this->pdo->prepare('call ChangePassword(?, ?)');
-            $stm->execute([$id, $password]);
+            $stm->execute([$id, password_hash($password, PASSWORD_DEFAULT)]);
             return true;
         } catch (PDOException $e) {
             return false;

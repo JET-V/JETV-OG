@@ -110,7 +110,7 @@
     <script>
         //setup periodique auto refresh
         // let pannel = AutoRefreshedPanel("id","thisController",5sec)
-        let panel = new AutoRefreshedPanel("refreshMain", "<?= $_SERVER['REQUEST_URI'] ?>", 10)
+        let panel = new AutoRefreshedPanel("refreshMain", <?= json_encode($_SERVER['REQUEST_URI'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>, 10)
     </script>
 <?php endif ?>
 

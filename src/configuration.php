@@ -11,7 +11,6 @@ const ROUTES = [
     '/enigma' => 'enigma.php',
     '/enigmaQuestion' => 'enigmaQuestion.php',
     '/details' => 'details.php',
-    '/detailstemp' => 'detailstemp.php',
     '/logout' => 'logout.php',
     '/meet-the-team' => 'meetTheTeam.php',
     '/profileForm' => 'profileForm.php',

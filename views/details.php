@@ -272,7 +272,6 @@ $inShop ?? false;
         <div class="form-group">
             <label for="comment" style="font-size:19px">Ajouter un commentaire :</label>
             <input type="hidden" name="itemID" value="<?= $item->getId() ?>">
-            <input type="hidden" name="playerID" value="<?= $user->getId() ?>">
             <textarea class="form-control" id="comment" name="comment" rows="3" required></textarea>
         </div>
         <div style="display:flex; flex-direction:row ;">
@@ -299,17 +298,17 @@ $inShop ?? false;
                     <?php foreach ($commentsData as $comment): ?>
                                 <div style="background-color: #303030; height: auto;  padding-bottom: 10px; margin: 20px;">
                                     <div style="display: flex; margin: 20px; padding-top: 20px;">
-                                        <img src="public/images/users/<?= $comment['userProfileImage']; ?>" class="rounded-circle"
+                                        <img src="public/images/users/<?= e($comment['userProfileImage']) ?>" class="rounded-circle"
                                             style="width: 30px; border-radius:10% !important; cursor:pointer;" alt="Avatar" />
                                         <p
                                             style="margin-left: 10px; margin-right: 10px; text-align: center; margin-top: auto; margin-bottom: auto;">
-                                            <?= $comment['username']; ?>
+                                            <?= e($comment['username']) ?>
                                         </p>
-                                        <img src="public/images/ui/stars_<?= $comment['starCount'] ?>" class="rounded-circle"
+                                        <img src="public/images/ui/stars_<?= (int) $comment['starCount'] ?>.png" class="rounded-circle"
                                             style="height: 30px; border-radius:10% !important; cursor:pointer;" alt="Avatar" />
                                     </div>
                                     <div style="margin-left: 20px;">
-                                        <p><?= $comment['comment']; ?></p>
+                                        <p><?= nl2br(e($comment['comment'])) ?></p>
                                     </div>
                                 </div>
                     <?php endforeach; ?>
