@@ -72,6 +72,12 @@ function displaySQLError(PDOException $exception): string
     return '<div class="alert alert-danger">' . $exception->getMessage() . '</div>';
 }
 
+// Escapes a value before putting it in the HTML (prevents XSS with what the players type)
+function e(mixed $value): string
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
+
 function updateCheckField(string $needle, array $hayStack): string
 {
     return isset($hayStack) && in_array($needle, $hayStack) ? 'checked' : '';

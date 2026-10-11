@@ -27,27 +27,27 @@ if (!isset($messageKey) || $messageKey != null)
 
                 <div class="mb-3">
                     <label for="firstName" class="form-label">Prénom</label>
-                    <input type="text" class="form-control" id="firstName" name="firstName" value="<?= $firstName ?? '' ?>">
+                    <input type="text" class="form-control" id="firstName" name="firstName" value="<?= e($firstName ?? '') ?>">
                 </div>
 
                 <div class="mb-3">
                     <label for="lastName" class="form-label">Nom</label>
-                    <input type="text" class="form-control" id="lastName" name="lastName" value="<?= $lastName ?? '' ?>">
+                    <input type="text" class="form-control" id="lastName" name="lastName" value="<?= e($lastName ?? '') ?>">
                 </div>
 
                 <div class="mb-3">
                     <label for="username" class="form-label">Alias</label>
-                    <input type="text" class="form-control" id="username" name="username" value="<?= $username ?? '' ?>">
+                    <input type="text" class="form-control" id="username" name="username" value="<?= e($username ?? '') ?>">
                 </div>
 
                 <div class="mb-3">
                     <label for="password" class="form-label">Mot de Passe</label>
-                    <input type="password" class="form-control" id="password" name="password" value="<?= $pass ?? '' ?>">
+                    <input type="password" class="form-control" id="password" name="password" value="<?= e($pass ?? '') ?>">
                 </div>
 
                 <div class="mb-3">
                     <label for="passwordConfirm" class="form-label">Confirmez le Mot de passe</label>
-                    <input type="password" class="form-control" id="passwordConfirm" name="passwordConfirm" value="<?= $pass2 ?? '' ?>">
+                    <input type="password" class="form-control" id="passwordConfirm" name="passwordConfirm" value="<?= e($pass2 ?? '') ?>">
                 </div>
 
                 <button type="submit" class="btn btn-primary">Créer</button>

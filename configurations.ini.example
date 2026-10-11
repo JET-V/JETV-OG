@@ -1,0 +1,7 @@
+; Copy this file to configurations.ini (ignored by Git) and fill in your own values.
+
+[database]
+hostname = localhost
+database = dbknapsak9
+username = root
+password =

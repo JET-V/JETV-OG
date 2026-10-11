@@ -105,12 +105,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 } else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $commentText = trim($_POST['comment']);
+    $commentText = trim($_POST['comment'] ?? '');
+    $itemID = (int) ($_POST['itemID'] ?? 0);
+    $stars = (int) ($_POST['stars'] ?? 0);
 
-    if (!empty($commentText) && isset($_POST['playerID'], $_POST['itemID'], $_POST['stars'])) {
-        $commentModel->addComment($_POST['itemID'], $_POST['playerID'], $commentText, $_POST['stars']);
+    // The author is the logged-in player, never a playerID sent by the form (anyone could change it)
+    if (isAuthenticated() && !empty($commentText) && $itemID > 0 && $stars >= 1 && $stars <= 5) {
+        $commentModel->addComment($itemID, $_SESSION['playerID'], $commentText, $stars);
     }
-    redirect('/details?itemID=' . $_POST['itemID']);
+    redirect('/details?itemID=' . $itemID);
 } else {
     redirect("/");  // todo change vers une page custom ??
 }

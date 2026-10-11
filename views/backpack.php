@@ -291,7 +291,7 @@ require 'views/partials/header.php';
                 <div class="input-group rounded"
                     style="width:100%; background-color:#1E1E1E; border:1px  #6c757d solid; border-radius:100px !important; color:white;">
                     <input form='main-form' id="search" type="search" name='name' class="form-control rounded searchy"
-                        placeholder="Search" value="<?= $filters['name'] ?? '' ?>" aria-label="Search"
+                        placeholder="Search" value="<?= e($filters['name'] ?? '') ?>" aria-label="Search"
                         style="background-color:#1E1E1E; border:0px;border-radius:100px !important; color:white;"
                         aria-describedby="search-addon" />
                     <span class="input-group-text border-0" id="search-addon"
@@ -456,7 +456,7 @@ require 'views/partials/header.php';
             <div class="input-group rounded"
                 style="width:486px; background-color:#1E1E1E; border:1px  #6c757d solid; border-radius:100px !important; color:white;">
                 <input form='main-form' id="search" type="search" name='name' class="form-control rounded searchy" placeholder="Search"
-                    value="<?= $filters['name'] ?? '' ?>"
+                    value="<?= e($filters['name'] ?? '') ?>"
                     aria-label="Search"
                     style="background-color:#1E1E1E; border:0px;border-radius:100px !important; color:white;"
                     aria-describedby="search-addon" />

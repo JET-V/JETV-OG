@@ -160,10 +160,10 @@
                 $user = $userModel->selectById($_SESSION['playerID']);
                 ?>
                 <div id="profilNotCollapse">
-                    <img src="public/images/users/<?= $user->getprofileimage(); ?>" class="rounded-circle"
+                    <img src="public/images/users/<?= e($user->getProfileImage()) ?>" class="rounded-circle"
                         style="width: 50px; border-radius:10% !important; cursor:pointer;" alt="Avatar" />
                     <a href="/profileForm" class="profile-link" style="margin:0px; margin-left:20px;">
-                        <?= $user->getUsername(); ?>
+                        <?= e($user->getUsername()) ?>
                     </a>
                     <img style="margin:0px; margin-left:20px;" src="public/images/ui/caps.png" alt="Card image caps"
                         width="30" height="30">
@@ -211,12 +211,12 @@
                             ?>
                             <div id="profilCollapse" style="display:flex; flex-direction:column; ">
                                 <div style="margin-bottom: 10px;">
-                                    <img src="public/images/users/<?= $user->getProfileImage(); ?>" class="rounded-circle"
+                                    <img src="public/images/users/<?= e($user->getProfileImage()) ?>" class="rounded-circle"
                                         style="width: 50px; border-radius:10% !important; cursor:pointer;" alt="Avatar" />
                                     <a href="/profileForm" class="profile-link" style="margin:0px; margin-left:20px;">
                                         <?php
 
-                                        echo $user->getUsername();
+                                        echo e($user->getUsername());
                                         ?>
                                     </a>
                                 </div>

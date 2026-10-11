@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else if (!$model->isUsernameAvailable($username) && $username != $user->getUsername()) {
             $messageKey = 'Cet alias est déjà pris';
         } else {
-            if (!empty($password) && $password != $user->getPassword()) {
+            if (!empty($password) && !password_verify($password, $user->getPassword())) {
                 $model->updatePassword($_SESSION['playerID'], $password);
             }
             $model->updateUser($username, $firstName, $lastName, $_SESSION['playerID']);
@@ -32,9 +32,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         if (isset($_FILES['fileToUpload']) && $_FILES['fileToUpload']['error'] === UPLOAD_ERR_OK) {
             $targetDir = "public/images/users/";
-            $fileName = basename($_FILES["fileToUpload"]["name"]);
+            $imageFileType = strtolower(pathinfo($_FILES["fileToUpload"]["name"], PATHINFO_EXTENSION));
+            // Generated name: never trust the uploaded file name (it could overwrite another player's image)
+            $fileName = 'player_' . $_SESSION['playerID'] . '_' . bin2hex(random_bytes(8)) . '.' . $imageFileType;
             $targetFile = $targetDir . $fileName;
-            $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
             $uploadOk = 1;
 
             // Validate file type
@@ -52,16 +53,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Allow only specific file formats
             if (!in_array($imageFileType, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-                $messageKey = "Seuls les fichiers JPG, JPEG, PNG et GIF sont autorisés.";
+                $messageKey = "Seuls les fichiers JPG, JPEG, PNG, GIF et WEBP sont autorisés.";
                 $uploadOk = 0;
             }
 
-            // Attempt to upload the file
-            if ($uploadOk && move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $targetFile)) {
-                $model->updateUserProfileImage($_SESSION['playerID'], $fileName);
-                $messageKey = "L'image de profil a été mise à jour avec succès.";
-            } else {
-                $messageKey = "Désolé, une erreur s'est produite lors du téléchargement de votre fichier.";
+            // Attempt to upload the file (keeps the validation message above if a check failed)
+            if ($uploadOk) {
+                if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $targetFile)) {
+                    $model->updateUserProfileImage($_SESSION['playerID'], $fileName);
+                    $messageKey = "L'image de profil a été mise à jour avec succès.";
+                } else {
+                    $messageKey = "Désolé, une erreur s'est produite lors du téléchargement de votre fichier.";
+                }
             }
         }
 }
