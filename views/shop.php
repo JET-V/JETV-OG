@@ -262,12 +262,12 @@ require 'views/partials/header.php';
 
             <div data-mdb-input-init class="form-outline">
                 <label for="postfix" class="form-label" style="display: inline;">Price Range</label>
-                <input id="postfix" value="<?= $filters['price_min'] ?? '' ?>" type="number" id="form2" name="price_min"
+                <input id="postfix" value="<?= !empty($filters['price_min']) ? (int) $filters['price_min'] : '' ?>" type="number" id="form2" name="price_min"
                     class="form-control" placeholder="Min" style="height:30px; margin-top: 5px;" />
             </div>
 
             <div data-mdb-input-init class="form-outline">
-                <input id="postfix" value="<?= $filters['price_max'] ?? '' ?>" type="number" id="form2" name="price_max"
+                <input id="postfix" value="<?= !empty($filters['price_max']) ? (int) $filters['price_max'] : '' ?>" type="number" id="form2" name="price_max"
                     class="form-control" placeholder="Max" style="height:30px;" />
             </div>
             <br>
